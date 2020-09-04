@@ -1,4 +1,9 @@
 /.gradle/
 /.idea/
 /build/
-/@jar.cmd
+/target/
+/release.properties
+
+/!release/
+/!deploy.cmd
+nktrace.iml

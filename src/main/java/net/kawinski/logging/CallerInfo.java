@@ -1,5 +1,8 @@
 package net.kawinski.logging;
 
+/**
+ * Helper class for collecting method's caller information.
+ */
 public final class CallerInfo {
     public static final CallerInfo UNKNOWN = new CallerInfo("unknown", "unknown", 0);
 
@@ -11,6 +14,7 @@ public final class CallerInfo {
 
     /**
      * Extracts caller info from stack trace element
+     * @param callerSte stack element from which to extract information about the caller
      */
     private CallerInfo(final StackTraceElement callerSte)
     {
@@ -43,8 +47,9 @@ public final class CallerInfo {
     }
 
     /**
-     * @param fqcn class name to filter for the stacktrace. All other stack entries are ignored.
-     *             The first caller after fqcn is returned
+     * @param fqcn class name to filter for the stacktrace.
+     *             All other stack entries are ignored.
+     * @return The first caller after fqcn
      */
     public static CallerInfo getCaller(final String fqcn)
     {

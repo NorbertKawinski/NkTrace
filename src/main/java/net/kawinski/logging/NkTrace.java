@@ -6,6 +6,10 @@ import org.slf4j.MarkerFactory;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LocationAwareLogger;
 
+/**
+ * Provides a closeable resource which logs entry/exit message logs.
+ * When created, it increments an indentation level for new logs.
+ */
 public class NkTrace implements AutoCloseable
 {
 	/**

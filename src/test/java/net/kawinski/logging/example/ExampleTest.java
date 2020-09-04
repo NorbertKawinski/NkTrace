@@ -51,28 +51,28 @@ public class ExampleTest {
         }
     }
 
-private void example02() {
-    try (final NkTrace trace = NkTrace.trace(logger)) {
-        logger.info("Received 1: {}", myMultiply1(3.0, 6.0));
-        logger.info("Received 2: {}", myMultiply2(3.0, 6.0));
+    private void example02() {
+        try (final NkTrace trace = NkTrace.trace(logger)) {
+            logger.info("Received 1: {}", myMultiply1(3.0, 6.0));
+            logger.info("Received 2: {}", myMultiply2(3.0, 6.0));
+        }
     }
-}
 
-private double myMultiply1(final double a, final double b) {
-    try (final NkTrace trace = NkTrace.debug(logger, "a: {}, b: {}", a, b)) {
-        logger.debug("You can log the return value into the exit trace instead of logging another line");
-        final double result = a * b;
-        trace.returning(result); // instead of logger.info("Returning({})", result);
-        return result;
+    private double myMultiply1(final double a, final double b) {
+        try (final NkTrace trace = NkTrace.debug(logger, "a: {}, b: {}", a, b)) {
+            logger.debug("You can log the return value into the exit trace instead of logging another line");
+            final double result = a * b;
+            trace.returning(result); // instead of logger.info("Returning({})", result);
+            return result;
+        }
     }
-}
 
-private double myMultiply2(final double a, final double b) {
-    try (final NkTrace trace = NkTrace.debug(logger, "a: {}, b: {}", a, b)) {
-        logger.debug("You can shorten exit trace and return value into a single line");
-        return trace.returning(a * b);
+    private double myMultiply2(final double a, final double b) {
+        try (final NkTrace trace = NkTrace.debug(logger, "a: {}, b: {}", a, b)) {
+            logger.debug("You can shorten exit trace and return value into a single line");
+            return trace.returning(a * b);
+        }
     }
-}
 
     public static void main(final String[] args) {
         new ExampleTest().example();

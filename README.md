@@ -1,16 +1,15 @@
 # NkTrace
 
-NkTrace is a Java library for making deep stacktraces easier to read in the log files.
-
+NkTrace is a Java library for making deep stack traces easier to read in the log files.  
 It\'s mainly done by wrapping methods in NkTrace blocks.
 ```
 try(NkTrace trace = NkTrace.info(logger)) { 
     logger.info("Some code here...");
 }
 ```
-Such block automatically creates "entry" and "exit" log entries.
-Additionally, all logs inside this block will be automatically indented to easily follow the span of the function.
-Resulting logs:
+Such block automatically creates "entry" and "exit" log entries.  
+Additionally, all logs inside this block will be automatically indented to easily follow the span of the function.  
+With NkTrace, the logs will look like:
 ```
  INFO >> ExampleTest.example:42
  INFO    Some code here...
@@ -20,56 +19,109 @@ Resulting logs:
 You can see more detailed examples in later sections of this readme.
 
 ## Download
-You can find the binaries here:
-- https://github.com/NorbertKawinski/NkTrace/releases
+Source code is available here, on Github:
+- <https://github.com/NorbertKawinski/NkTrace>
+
+For binaries, look here:
+- <https://github.com/NorbertKawinski/NkTrace/releases>
 
 ## Setup
 ### Requirements:
-* Java8+
+* Java8+ 
 * SLF4J
 * SLF4J-compatible logging framework
+* Maven
 
 #### Note on compatibility with SLF4J
 Not all SLF4J-compatible frameworks works well with NkTrace as it requires:
 * MDC (Mapped Diagnostic Context) support required for indentation feature
 * (Optional) Marker support required if you want to use custom entry/exit message patterns
 
-Logback and Log4J implement all these features. 
+Logback and Log4J implement all these features.  
 Before using any other logging framework, please confirm the support for MDC and Markers.
 
 ### Compiling NkTrace from sources
 Just run the following command in the commandline
 ```
-gradlew clean jar
+mvn clean package
 ```
 You should see the NkTrace-xxx.jar generated in the ***./build/libs/*** subdirectory.
 
 ### Adding NkTrace to your project
-* Add NkTrace-x.x.x.x.jar as a dependency
+We need to add NkTrace-x.x.x.x.jar as a dependency.
+
+You can download the binary and add it manually to the classpath,  
+or use a dependency manager (like Maven or Gradle).
+
+For Maven:
+```
+<dependency>
+    <groupId>net.kawinski.logging</groupId>
+    <artifactId>nktrace</artifactId>
+    <version>${nktrace_version}</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+For Gradle:
+```
+dependencies {
+    implementation group: "net.kawinski.logging", name: "nktrace", version: "${nktrace_version}"
+}
+```
+
 
 ### Setting up standard formatter
-To make the indentation work, you\'ll need to configure the message format to include indentation from the MDC.
-For example, you can configure the following format in Logback:
+To make the indentation work, you\'ll need to configure the message format to include indentation from the MDC.  
+Create ```src/main/resources/logback.xml``` file: 
 ```
-%date [%thread] %5level %mdc{indent}%msg \(%file:%line\) %n
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date [%thread] %5level %mdc{indent}%msg \(%file:%line\) %n</Pattern>
+        </layout>
+    </appender>
+    <root level="all">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
 ```
-This readme used the following (simplified) format:
+
+Or, if you\'d rather like to configure NkTrace programmatically:
+```
+final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+final PatternLayoutEncoder ple = new PatternLayoutEncoder();
+ple.setPattern("%date [%thread] %5level %mdc{indent}%msg \\(%file:%line\\)%n");
+ple.setContext(lc);
+ple.start();
+
+final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
+consoleAppender.setEncoder(ple);
+consoleAppender.setContext(lc);
+consoleAppender.start();
+
+final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+rootLogger.detachAndStopAllAppenders();
+rootLogger.addAppender(consoleAppender);
+rootLogger.setLevel(Level.ALL);
+```
+
+Note: This readme used the following (simplified) layout format:
 ```
 %5level %mdc{indent}%msg%n
 ```
 
 ### (Optional) Setting up custom formatter (Logback)
-Depending on your setup of the pattern layout, you might want to display entry/exit logs differently.
-It\'s certainly possible because NkTrace uses special markers "NkTraceEntry" and "NkTraceExit" for its messages.
+Depending on your setup of the pattern layout, you might want to display entry/exit logs differently.  
+It\'s certainly possible because NkTrace uses special markers ```NkTraceEntry``` and ```NkTraceExit``` for its messages.  
 Thanks to this, you can apply different log format only for these messages.
 
-Since Logback doesn't allow setting different layouts based on the marker, we have to do it ourselves.
-
-Please copy the NkPatternLayout class to your project. This class is located in "test/java/net/kawinski/logging/utils/NkPatternLayout"
-
+Since Logback doesn't allow setting different layouts based on the marker out of the box, we have to do it ourselves.  
+Please copy the NkPatternLayout class to your project. This class is located in ```test/java/net/kawinski/logging/utils/NkPatternLayout```  
 This class holds 3 pattern layouts inside and switches on them based on the marker in the logging event.
 
-Example XML appender configuration: 
+All that\'s left is XML appender configuration: 
 ```
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
@@ -115,7 +167,7 @@ private void example01C() {
 }
 ```
 
-calling "example01" produces logs similar to:
+calling ```example01``` produces logs similar to:
 ```
  INFO >> ExampleTest.example01:26
  INFO    Inside example01
@@ -132,7 +184,7 @@ DEBUG       After 01C
 TRACE    << ExampleTest.example01B:40
  INFO << ExampleTest.example01:26
 ```
-As you can see, each function is marked with ">>" and "<<" entries along with inner logs being indented.
+As you can see, each function is marked with ```>>``` and ```<<``` entries along with inner logs being indented.
 
 ## Example 2
 Following code shows how to add custom messages to entry/exit logs.
@@ -161,7 +213,7 @@ private double myMultiply2(final double a, final double b) {
 }
 ```
 
-calling "example02" produces logs similar to:
+calling ```example02``` produces logs similar to:
 ```
 TRACE >> ExampleTest.example02:55
 DEBUG    >> ExampleTest.myMultiply1:62 a: 3.0, b: 6.0

@@ -4,7 +4,7 @@ import org.slf4j.MDC;
 
 /**
  * Indents module for NkTrace.
- * It exposes 'indent' variable to logger's context.
+ * It exposes 'indent' variable to logger's context via ThreadLocal variables and MDC.
  *
  * To utilize the indenting feature, setup the logger's pattern to something like:
  * - Logback example: %date [%thread] %5level %mdc{indent}%msg \(%file:%line\) %n
@@ -20,7 +20,7 @@ public final class NkTraceIndent
 	public static final String MDC_INDENT_KEY = "indent";
 
 	/**
-	 * 3 is a prefix length of ">> " and "<< ".
+	 * 3 is a prefix length of "&gt;&gt; " and "&lt;&lt; ".
 	 * This way, inner logs align vertically to the traces which looks pretty
 	 */
 	public static final int SPACES_PER_INDENT = 3;
