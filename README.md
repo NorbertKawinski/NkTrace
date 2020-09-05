@@ -16,44 +16,21 @@ With NkTrace, the logs will look like:
  INFO << ExampleTest.example:42
 ```
 
-You can see more detailed examples in later sections of this readme.
+You can see more detailed examples in later sections of this readme.  
+To see an example project using NkTrace, check out this repository:  
+<https://github.com/NorbertKawinski/NkTraceExample>
 
-## Download
-Source code is available here, on Github:
-- <https://github.com/NorbertKawinski/NkTrace>
+# Installation
+## Add NkTrace dependency
+To start using NkTrace, we need to add NkTrace as a dependency.
 
-For binaries, look here:
-- <https://github.com/NorbertKawinski/NkTrace/releases>
-
-## Setup
-### Requirements:
-* Java8+ 
-* SLF4J
-* SLF4J-compatible logging framework
-* Maven
-
-#### Note on compatibility with SLF4J
-Not all SLF4J-compatible frameworks works well with NkTrace as it requires:
-* MDC (Mapped Diagnostic Context) support required for indentation feature
-* (Optional) Marker support required if you want to use custom entry/exit message patterns
-
-Logback and Log4J implement all these features.  
-Before using any other logging framework, please confirm the support for MDC and Markers.
-
-### Compiling NkTrace from sources
-Just run the following command in the commandline
-```
-mvn clean package
-```
-You should see the NkTrace-xxx.jar generated in the ***./build/libs/*** subdirectory.
-
-### Adding NkTrace to your project
-We need to add NkTrace-x.x.x.x.jar as a dependency.
-
-You can download the binary and add it manually to the classpath,  
+You can download the binary yourself and add it manually to the classpath  
 or use a dependency manager (like Maven or Gradle).
 
-For Maven:
+### Manual installation  
+Pick a release from the [releases section](https://github.com/NorbertKawinski/NkTrace/releases)  
+
+### Maven
 ```
 <dependency>
     <groupId>net.kawinski.logging</groupId>
@@ -63,16 +40,30 @@ For Maven:
 </dependency>
 ```
 
-For Gradle:
+### Gradle
 ```
 dependencies {
     implementation group: "net.kawinski.logging", name: "nktrace", version: "${nktrace_version}"
 }
 ```
 
+## Add SLF4J-compatible logging framework
+NkTrace isn\'t a standalone library.  
+Since NkTrace depends on SLF4J, you need to choose your preferred logging framework.
 
-### Setting up standard formatter
-To make the indentation work, you\'ll need to configure the message format to include indentation from the MDC.  
+Not all SLF4J-compatible frameworks works well with NkTrace, because it requires:
+* MDC (Mapped Diagnostic Context) support required for indentation feature
+* (Optional) Marker support required if you want to use custom entry/exit message patterns
+
+```Logback``` and ```Log4j``` implement all these features.  
+Before using any other logging framework, please confirm the support for MDC and Markers.
+
+## Setting up standard formatter (Logback example)
+To make the indentation work, you\'ll need to configure the message format to include indentation from the MDC.
+
+This section will show you Logback example.  
+If you are using any other logging framework, check its formatter documentation.
+
 Create ```src/main/resources/logback.xml``` file: 
 ```
 <configuration>
@@ -112,13 +103,13 @@ Note: This readme used the following (simplified) layout format:
 %5level %mdc{indent}%msg%n
 ```
 
-### (Optional) Setting up custom formatter (Logback)
+### (Optional) Setting up custom formatter (Logback example)
 Depending on your setup of the pattern layout, you might want to display entry/exit logs differently.  
 It\'s certainly possible because NkTrace uses special markers ```NkTraceEntry``` and ```NkTraceExit``` for its messages.  
 Thanks to this, you can apply different log format only for these messages.
 
 Since Logback doesn't allow setting different layouts based on the marker out of the box, we have to do it ourselves.  
-Please copy the NkPatternLayout class to your project. This class is located in ```test/java/net/kawinski/logging/utils/NkPatternLayout```  
+Please copy the ```NkPatternLayout``` class to your project. This class is located in ```test/java/net/kawinski/logging/utils``` package  
 This class holds 3 pattern layouts inside and switches on them based on the marker in the logging event.
 
 All that\'s left is XML appender configuration: 

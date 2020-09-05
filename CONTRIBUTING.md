@@ -4,6 +4,13 @@ This file contains notes and guides for contributors of this projects.
 Thank you for considering making this library better!  
 If you\'d like to help, please create a pull request, or open an issue.  
 
+### Compiling
+Just run the following command in the commandline
+```
+mvn clean package
+```
+You should see the the .jar generated in the ```target/``` directory.
+
 ## Deployment
 This section might be a bit outdated.  
 If in doubt, follow the information regarding publishing at:  
