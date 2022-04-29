@@ -13,19 +13,17 @@ public final class CallerInfo {
     public final int lineNumber;
 
     /**
-     * Extracts caller info from stack trace element
-     * @param callerSte stack element from which to extract information about the caller
+     * Extracts caller info from StackFrame
+     * @param frame stack frame from which to extract information about the caller
      */
-    private CallerInfo(final StackTraceElement callerSte)
-    {
-        this(callerSte.getClassName(), callerSte.getMethodName(), callerSte.getLineNumber());
+    private CallerInfo(final StackWalker.StackFrame frame) {
+        this(frame.getClassName(), frame.getMethodName(), frame.getLineNumber());
     }
 
-    private CallerInfo(final String fullClassName, final String methodName, final int lineNumber)
-    {
+    private CallerInfo(final String fullClassName, final String methodName, final int lineNumber) {
         this.fullClassName = fullClassName;
-        final String[] classNameArr = fullClassName.split("\\.");
-        this.shortClassName = classNameArr[classNameArr.length - 1];
+        int shortClassNameIndex = fullClassName.lastIndexOf(".");
+        this.shortClassName = fullClassName.substring(shortClassNameIndex + 1);
         this.methodName = methodName;
         this.lineNumber = lineNumber;
     }
@@ -38,12 +36,13 @@ public final class CallerInfo {
     /**
      * @return Immediate caller of this function
      */
-    public static CallerInfo getCaller()
-    {
-        final int callerStackTraceIndex = 3; // Empirical research shows that the caller resides at this index...
-        final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        final StackTraceElement stack = stackTrace[callerStackTraceIndex];
-        return new CallerInfo(stack);
+    public static CallerInfo getCaller() {
+        StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+        return walker.walk(frames -> frames
+                .skip(2L) // Skip ourselves and our caller
+                .map(CallerInfo::new)
+                .findFirst()
+                .orElseThrow());
     }
 
     /**
@@ -51,22 +50,13 @@ public final class CallerInfo {
      *             All other stack entries are ignored.
      * @return The first caller after fqcn
      */
-    public static CallerInfo getCaller(final String fqcn)
-    {
-        final int callerStackTraceIndex = 3; // Empirical research shows that the caller resides at this index...
-        final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for(int i = callerStackTraceIndex; i < stackTrace.length; ++i) {
-            final StackTraceElement stack = stackTrace[i];
-            if(fqcn.equals(stack.getClassName())) {
-                // stacktrace[i + 1] --> It theoretically could result in index out-of-bounds exceptions,
-                // but in reality there's no chance thread's run() method would already be a proxy.
-                // Only proxy loggers are allowed to pass their FQCN. So index out-of-bound exception would be a programmer error anyway.
-                final StackTraceElement resultStack = stackTrace[i + 1];
-                if(fqcn.equals(resultStack.getClassName()))
-                    continue; // We're still in the same FQCN. Let's dig deeper.
-                return new CallerInfo(resultStack);
-            }
-        }
-        return UNKNOWN;
+    public static CallerInfo getCaller(final String fqcn) {
+        StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+        return walker.walk(frames -> frames
+                .dropWhile(frame -> !frame.getClassName().equals(fqcn))
+                .dropWhile(frame -> frame.getClassName().equals(fqcn))
+                .map(CallerInfo::new)
+                .findFirst()
+                .orElse(UNKNOWN));
     }
 }

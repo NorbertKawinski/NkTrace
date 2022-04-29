@@ -39,6 +39,7 @@ Pick a release from the [releases section](https://github.com/NorbertKawinski/Nk
     <scope>compile</scope>
 </dependency>
 ```
+List of available NkTrace release versions is available on [Maven Central](https://search.maven.org/artifact/net.kawinski.logging/nktrace)
 
 ### Gradle
 ```
@@ -46,6 +47,7 @@ dependencies {
     implementation group: "net.kawinski.logging", name: "nktrace", version: "${nktrace_version}"
 }
 ```
+List of available NkTrace release versions is available on [Maven Central](https://search.maven.org/artifact/net.kawinski.logging/nktrace)
 
 ## Add SLF4J-compatible logging framework
 NkTrace isn\'t a standalone library.  
@@ -68,9 +70,9 @@ Create ```src/main/resources/logback.xml``` file:
 ```
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%date [%thread] %5level %mdc{indent}%msg \(%file:%line\) %n</Pattern>
-        </layout>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%date [%thread] %5level %mdc{NkTrace_Indent}%msg \(%file:%line\) %n</pattern>
+        </encoder>
     </appender>
     <root level="all">
         <appender-ref ref="CONSOLE"/>
@@ -83,7 +85,7 @@ Or, if you\'d rather like to configure NkTrace programmatically:
 final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
 final PatternLayoutEncoder ple = new PatternLayoutEncoder();
-ple.setPattern("%date [%thread] %5level %mdc{indent}%msg \\(%file:%line\\)%n");
+ple.setPattern("%date [%thread] %5level %mdc{NkTrace_Indent}%msg \\(%file:%line\\)%n");
 ple.setContext(lc);
 ple.start();
 
@@ -100,7 +102,7 @@ rootLogger.setLevel(Level.ALL);
 
 Note: This readme used the following (simplified) layout format:
 ```
-%5level %mdc{indent}%msg%n
+%5level %mdc{NkTrace_Indent}%msg%n
 ```
 
 ### (Optional) Setting up custom formatter (Logback example)
@@ -117,9 +119,9 @@ All that\'s left is XML appender configuration:
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
         <layout class="net.kawinski.logging.utils.NkPatternLayout">
-            <entryPattern>%5level %mdc{indent}Entering %method in %class{0} %msg .\(%file:%line\)%n</entryPattern>
-            <regularPattern>%5level %mdc{indent}%msg .\(%file:%line\)%n</regularPattern>
-            <exitPattern>%5level %mdc{indent}Exiting %method in %class{0} %msg .\(%file:%line\)%n</exitPattern>
+            <entryPattern>%5level %mdc{NkTrace_Indent}Entering %method in %class{0} %msg .\(%file:%line\)%n</entryPattern>
+            <regularPattern>%5level %mdc{NkTrace_Indent}%msg .\(%file:%line\)%n</regularPattern>
+            <exitPattern>%5level %mdc{NkTrace_Indent}Exiting %method in %class{0} %msg .\(%file:%line\)%n</exitPattern>
         </layout>
     </encoder>
 </appender>

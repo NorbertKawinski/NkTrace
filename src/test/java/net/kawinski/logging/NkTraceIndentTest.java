@@ -19,9 +19,9 @@ public class NkTraceIndentTest {
     @Test
     public void reset_should_set_indent_count_to_0() {
         NkTraceIndent.increment();
-        assertThat(NkTraceIndent.getIndentCount(), is(1));
+        assertThat(NkTraceIndent.getIndentLevel(), is(1));
         NkTraceIndent.reset();
-        assertThat(NkTraceIndent.getIndentCount(), is(0));
+        assertThat(NkTraceIndent.getIndentLevel(), is(0));
     }
 
     @Test
@@ -34,9 +34,9 @@ public class NkTraceIndentTest {
 
     @Test
     public void increment_should_increment_indent_value() {
-        assertThat(NkTraceIndent.getIndentCount(), is(0));
+        assertThat(NkTraceIndent.getIndentLevel(), is(0));
         NkTraceIndent.increment();
-        assertThat(NkTraceIndent.getIndentCount(), is(1));
+        assertThat(NkTraceIndent.getIndentLevel(), is(1));
     }
 
     @Test
@@ -48,10 +48,10 @@ public class NkTraceIndentTest {
 
     @Test
     public void decrement_should_decrement_indent_value() {
-        assertThat(NkTraceIndent.getIndentCount(), is(0));
+        assertThat(NkTraceIndent.getIndentLevel(), is(0));
         NkTraceIndent.increment();
         NkTraceIndent.decrement();
-        assertThat(NkTraceIndent.getIndentCount(), is(0));
+        assertThat(NkTraceIndent.getIndentLevel(), is(0));
     }
 
     @Test
@@ -64,11 +64,11 @@ public class NkTraceIndentTest {
 
     @Test
     public void getIndentCount_should_return_current_value() {
-        assertThat(NkTraceIndent.getIndentCount(), is(0));
+        assertThat(NkTraceIndent.getIndentLevel(), is(0));
         NkTraceIndent.increment();
         NkTraceIndent.increment();
         NkTraceIndent.increment();
-        assertThat(NkTraceIndent.getIndentCount(), is(3));
+        assertThat(NkTraceIndent.getIndentLevel(), is(3));
     }
 
     @Test

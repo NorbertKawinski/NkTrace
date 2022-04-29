@@ -73,7 +73,7 @@ public class TestUtils {
 
     private static void setupDefaultLogger(final LoggerContext lc) {
         final PatternLayoutEncoder defaultLayoutEncoder = new PatternLayoutEncoder();
-        defaultLayoutEncoder.setPattern("%5level %mdc{indent}%msg%n");
+        defaultLayoutEncoder.setPattern("%5level %mdc{NkTrace_Indent}%msg%n");
         defaultLayoutEncoder.setContext(lc);
         defaultLayoutEncoder.start();
 
@@ -95,9 +95,9 @@ public class TestUtils {
     private static void setupCustomLogger(final LoggerContext lc) {
         final NkPatternLayout customPatternLayout = new NkPatternLayout();
         customPatternLayout.setContext(lc);
-        customPatternLayout.setEntryPattern("%5level %mdc{indent}Entering %method in %class{0} %msg .\\(%file:%line\\)%n");
-        customPatternLayout.setRegularPattern("%5level %mdc{indent}%msg .\\(%file:%line\\)%n");
-        customPatternLayout.setExitPattern("%5level %mdc{indent}Exiting %method in %class{0} %msg .\\(%file:%line\\)%n");
+        customPatternLayout.setEntryPattern("%5level %mdc{NkTrace_Indent}Entering %method in %class{0} %msg .\\(%file:%line\\)%n");
+        customPatternLayout.setRegularPattern("%5level %mdc{NkTrace_Indent}%msg .\\(%file:%line\\)%n");
+        customPatternLayout.setExitPattern("%5level %mdc{NkTrace_Indent}Exiting %method in %class{0} %msg .\\(%file:%line\\)%n");
         customPatternLayout.start();
 
         final LayoutWrappingEncoder<ILoggingEvent> customLayoutEncoder = new LayoutWrappingEncoder<>();

@@ -10,8 +10,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * Provides a closeable resource which logs entry/exit message logs.
  * When created, it increments an indentation level for new logs.
  */
-public class NkTrace implements AutoCloseable
-{
+public class NkTrace implements AutoCloseable {
 	/**
 	 * Set to false if you want to customize format of entry/exit messages
 	 */
@@ -22,10 +21,12 @@ public class NkTrace implements AutoCloseable
 	public static final String MARKER_TRACE_EXIT_NAME = "NkTraceExit";
 	public static final Marker MARKER_TRACE_ENTRY = MarkerFactory.getMarker(MARKER_TRACE_ENTRY_NAME);
 	public static final Marker MARKER_TRACE_EXIT = MarkerFactory.getMarker(MARKER_TRACE_EXIT_NAME);
-	// Idea: Maybe add MARKER_TRACE_ENTRY/EXIT_MESSAGE to allow different pattern (would allow fixing two-spaces issue)
 
+	/**
+	 * When using custom format, NkTrace doesn't retrieve the stacktrace.
+	 * Instead the FQCN is passed and the target logger walks the stacktrace.
+	 */
 	private final String fqcn;
-	@SuppressWarnings("NonConstantLogger")
 	private final Logger logger;
 	private final Level level;
 	private final boolean canLog;
@@ -34,12 +35,7 @@ public class NkTrace implements AutoCloseable
 	private String exitMsg = "";
 	private Object[] exitMsgArgs = {};
 
-	public NkTrace(final Logger logger, final Level level, final String format, final Object... formatArgs) {
-		this(DEFAULT_FQCN, logger, level, format, formatArgs);
-	}
-
-	public NkTrace(final String fqcn, final Logger logger, final Level level, final String format, final Object... formatArgs)
-	{
+	public NkTrace(final String fqcn, final Logger logger, final Level level, final String format, final Object... formatArgs) {
 		this.fqcn = fqcn;
 		this.logger = logger;
 		this.level = level;
@@ -55,48 +51,40 @@ public class NkTrace implements AutoCloseable
 	}
 	
 	@Override
-	public void close()
-	{
-		if(!canLog)
+	public void close() {
+		if(!canLog) {
 			return;
-
+		}
 		NkTraceIndent.decrement();
 		doExitLog();
 	}
 
-	public void setExitMsg(final Object exitMsg) {
-		setExitMsg("{}", exitMsg);
+	public void setExitMsg(final String exitMsgFormat, final Object... exitMsgFormatArgs) {
+		this.exitMsg = exitMsgFormat;
+		this.exitMsgArgs = exitMsgFormatArgs.clone();
 	}
 
-	public void setExitMsg(final String format, final Object... formatArgs) {
-		returning(returning, format, formatArgs);
-	}
-
-	public <T> T returning(final T result)
-	{
-		return returning(result, exitMsg, exitMsgArgs);
-	}
-
-	public <T> T returning(final T result, final String format, final Object... formatArgs)
-	{
+	public <T> T returning(final T result) {
 		returning = result;
-		exitMsg = format;
-		exitMsgArgs = formatArgs.clone();
 		return result;
 	}
 
-	private static void doLog(final String fqcn, final Logger loggerArg, final Level level, final Marker marker, final String format, final Object[] formatArgs) {
-		final LocationAwareLogger logger = (LocationAwareLogger)loggerArg;
-		logger.log(marker, fqcn, level.toInt(), format, formatArgs, null);
+	public <T> T returning(final T result, final String exitMsgFormat, final Object... exitMsgFormatArgs) {
+		returning = result;
+		exitMsg = exitMsgFormat;
+		exitMsgArgs = exitMsgFormatArgs.clone();
+		return result;
 	}
 
-	private void doEntryLog(final String format, final Object[] formatArgs) {
-		String finalFormat = format;
+	private void doEntryLog(final String extraMsgFormat, final Object[] extraMsgFormatArgs) {
+		String finalFormat;
 		if(useDefaultFormatting) {
 			finalFormat = ">> " + caller.shortClassName + "." + caller.methodName + ":" + caller.lineNumber +
-					(format.isEmpty() ? "" : " " + format);
+					(extraMsgFormat.isEmpty() ? "" : " " + extraMsgFormat);
+		} else {
+			finalFormat = extraMsgFormat;
 		}
-		doLog(fqcn, logger, level, MARKER_TRACE_ENTRY, finalFormat, formatArgs);
+		doLog(fqcn, logger, level, MARKER_TRACE_ENTRY, finalFormat, extraMsgFormatArgs);
 	}
 
 	private void doExitLog() {
@@ -128,27 +116,33 @@ public class NkTrace implements AutoCloseable
 		doLog(fqcn, logger, level, MARKER_TRACE_EXIT, finalExitMsg.toString(), finalExitMsgArgs);
 	}
 
+	private static void doLog(final String fqcn, final Logger loggerArg, final Level level, final Marker marker, final String format, final Object[] formatArgs) {
+		final LocationAwareLogger logger = (LocationAwareLogger)loggerArg;
+		logger.log(marker, fqcn, level.toInt(), format, formatArgs, null);
+	}
+
+
 	public static NkTrace trace(final Logger logger) {
-		return new NkTrace(logger, Level.TRACE, "");
+		return new NkTrace(DEFAULT_FQCN, logger, Level.TRACE, "");
 	}
 
 	public static NkTrace trace(final Logger logger, final String format, final Object... formatArgs) {
-		return new NkTrace(logger, Level.TRACE, format, formatArgs);
+		return new NkTrace(DEFAULT_FQCN, logger, Level.TRACE, format, formatArgs);
 	}
 
 	public static NkTrace debug(final Logger logger) {
-		return new NkTrace(logger, Level.DEBUG, "");
+		return new NkTrace(DEFAULT_FQCN, logger, Level.DEBUG, "");
 	}
 
 	public static NkTrace debug(final Logger logger, final String format, final Object... formatArgs) {
-		return new NkTrace(logger, Level.DEBUG, format, formatArgs);
+		return new NkTrace(DEFAULT_FQCN, logger, Level.DEBUG, format, formatArgs);
 	}
 
 	public static NkTrace info(final Logger logger) {
-		return new NkTrace(logger, Level.INFO, "");
+		return new NkTrace(DEFAULT_FQCN, logger, Level.INFO, "");
 	}
 
 	public static NkTrace info(final Logger logger, final String format, final Object... formatArgs) {
-		return new NkTrace(logger, Level.INFO, format, formatArgs);
+		return new NkTrace(DEFAULT_FQCN, logger, Level.INFO, format, formatArgs);
 	}
 }
