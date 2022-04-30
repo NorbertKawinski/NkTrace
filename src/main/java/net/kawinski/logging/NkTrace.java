@@ -13,6 +13,12 @@ import org.slf4j.spi.LocationAwareLogger;
  * When created, it increments an indentation level for new logs.
  */
 public class NkTrace implements AutoCloseable {
+	/**
+	 * To reduce configuration effort, NkTrace provides default formatting.
+	 * If you want, you can disable this feature and configure the pattern yourself.
+	 */
+	public static boolean useDefaultFormatting = Boolean.parseBoolean(System.getProperty("NKTRACE_USE_DEFAULT_FORMATTING", "true"));
+
 	private static final String DEFAULT_FQCN = NkTrace.class.getName();
 
 	/**
@@ -43,6 +49,7 @@ public class NkTrace implements AutoCloseable {
 	private final LocationAwareLogger logger;
 	private final Level level;
 	private final boolean canLog;
+	private final CallerInfo caller;
 	private Object returning = null;
 	private String exitMsgFormat = "";
 	private Object[] exitMsgFormatArgs = {};
@@ -62,11 +69,12 @@ public class NkTrace implements AutoCloseable {
 		this.level = level;
 		this.canLog = LoggingUtils.canLog(logger, level);
 		if(!canLog) {
+			caller = CallerInfo.UNKNOWN;
 			return;
 		}
+		caller = CallerInfo.getCaller(fqcn);
 
-		String finalEntryFormat = entryFormat.isBlank() ? "" : " " + entryFormat;
-		this.logger.log(MARKER_TRACE_ENTRY, fqcn, level.toInt(), finalEntryFormat, entryFormatArgs, null);
+		doEntryLog(entryFormat, entryFormatArgs);
 		NkTraceIndent.increment();
 	}
 
@@ -122,9 +130,29 @@ public class NkTrace implements AutoCloseable {
 		return result;
 	}
 
+	private void doEntryLog(final String extraMsgFormat, final Object[] extraMsgFormatArgs) {
+		String finalFormat;
+		if(useDefaultFormatting) {
+			finalFormat = ">> " + caller.shortClassName + "." + caller.methodName + ":" + caller.lineNumber +
+					(extraMsgFormat.isEmpty() ? "" : " " + extraMsgFormat);
+		} else {
+			finalFormat = extraMsgFormat;
+		}
+		this.logger.log(MARKER_TRACE_ENTRY, fqcn, level.toInt(), finalFormat, extraMsgFormatArgs, null);
+	}
+
 	private void doExitLog() {
 		final StringBuilder finalExitFormat = new StringBuilder();
 		Object[] finalExitFormatArgs = exitMsgFormatArgs;
+
+		if(useDefaultFormatting) {
+			finalExitFormat.append("<< ");
+			finalExitFormat.append(caller.shortClassName);
+			finalExitFormat.append(".");
+			finalExitFormat.append(caller.methodName);
+			finalExitFormat.append(":");
+			finalExitFormat.append(caller.lineNumber);
+		}
 
 		if(returning != null) {
 			finalExitFormat.append(" returning({})");

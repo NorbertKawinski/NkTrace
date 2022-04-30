@@ -6,6 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+// This comment serves only for line-number alignment purposes
+// This comment serves only for line-number alignment purposes
 @SuppressWarnings("EmptyTryBlock")
 public class NkTraceTest {
     private Logger logger;
@@ -20,8 +22,8 @@ public class NkTraceTest {
         try(final NkTrace trace = NkTrace.info(logger)) {
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.trace_should_print_entry_and_exit_messages",
-                " INFO << NkTraceTest.trace_should_print_entry_and_exit_messages");
+                " INFO >> NkTraceTest.trace_should_print_entry_and_exit_messages:22",
+                " INFO << NkTraceTest.trace_should_print_entry_and_exit_messages:22");
     }
 
     @Test
@@ -29,8 +31,8 @@ public class NkTraceTest {
         try(final NkTrace trace = NkTrace.info(logger, "Hello {}. 2+2={}", "Peter", 4)) {
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.trace_entry_should_print_formatted_message Hello Peter. 2+2=4",
-                " INFO << NkTraceTest.trace_entry_should_print_formatted_message");
+                " INFO >> NkTraceTest.trace_entry_should_print_formatted_message:31 Hello Peter. 2+2=4",
+                " INFO << NkTraceTest.trace_entry_should_print_formatted_message:31");
     }
 
     @Test
@@ -39,8 +41,8 @@ public class NkTraceTest {
             trace.setExitMsg("I'm {} and I'm quitting! 2+2={}", "Peter", 4);
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.trace_exit_should_print_formatted_message",
-                " INFO << NkTraceTest.trace_exit_should_print_formatted_message I'm Peter and I'm quitting! 2+2=4");
+                " INFO >> NkTraceTest.trace_exit_should_print_formatted_message:40",
+                " INFO << NkTraceTest.trace_exit_should_print_formatted_message:40 I'm Peter and I'm quitting! 2+2=4");
     }
 
     @Test
@@ -49,8 +51,8 @@ public class NkTraceTest {
             trace.returning("Something");
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.trace_exit_should_print_returned_object",
-                " INFO << NkTraceTest.trace_exit_should_print_returned_object returning(Something)");
+                " INFO >> NkTraceTest.trace_exit_should_print_returned_object:50",
+                " INFO << NkTraceTest.trace_exit_should_print_returned_object:50 returning(Something)");
     }
 
     @Test
@@ -60,8 +62,8 @@ public class NkTraceTest {
             trace.setExitMsg("I'm {} and I'm quitting! 2+2={}", "Peter", 4);
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.trace_exit_should_print_returned_object_and_formatted_message",
-                " INFO << NkTraceTest.trace_exit_should_print_returned_object_and_formatted_message returning(Something) I'm Peter and I'm quitting! 2+2=4");
+                " INFO >> NkTraceTest.trace_exit_should_print_returned_object_and_formatted_message:60",
+                " INFO << NkTraceTest.trace_exit_should_print_returned_object_and_formatted_message:60 returning(Something) I'm Peter and I'm quitting! 2+2=4");
     }
 
     @Test
@@ -73,12 +75,12 @@ public class NkTraceTest {
             }
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.messages_inside_trace_should_be_indented",
+                " INFO >> NkTraceTest.messages_inside_trace_should_be_indented:71",
                 " INFO    Indented message",
-                " INFO    >> NkTraceTest.messages_inside_trace_should_be_indented",
+                " INFO    >> NkTraceTest.messages_inside_trace_should_be_indented:73",
                 " INFO       Indented twice",
-                " INFO    << NkTraceTest.messages_inside_trace_should_be_indented",
-                " INFO << NkTraceTest.messages_inside_trace_should_be_indented");
+                " INFO    << NkTraceTest.messages_inside_trace_should_be_indented:73",
+                " INFO << NkTraceTest.messages_inside_trace_should_be_indented:71");
     }
 
     @Test
@@ -91,9 +93,9 @@ public class NkTraceTest {
             }
         }
         TestUtils.assertLoggerOutputEqual(
-                " INFO >> NkTraceTest.traces_with_low_level_should_be_ignored",
+                " INFO >> NkTraceTest.traces_with_low_level_should_be_ignored:89",
                 " INFO    Indented message",
-                " INFO << NkTraceTest.traces_with_low_level_should_be_ignored");
+                " INFO << NkTraceTest.traces_with_low_level_should_be_ignored:89");
     }
 
     @Test
@@ -111,18 +113,35 @@ public class NkTraceTest {
         try(final NkTrace innerTrace = NkTrace.info(logger, "with param {}", 3)) {
         }
         TestUtils.assertLoggerOutputEqual(
-                "TRACE >> NkTraceTest.traces_can_be_created_with_different_log_levels",
-                "TRACE << NkTraceTest.traces_can_be_created_with_different_log_levels",
-                "DEBUG >> NkTraceTest.traces_can_be_created_with_different_log_levels",
-                "DEBUG << NkTraceTest.traces_can_be_created_with_different_log_levels",
-                " INFO >> NkTraceTest.traces_can_be_created_with_different_log_levels",
-                " INFO << NkTraceTest.traces_can_be_created_with_different_log_levels",
-                "TRACE >> NkTraceTest.traces_can_be_created_with_different_log_levels with param 1",
-                "TRACE << NkTraceTest.traces_can_be_created_with_different_log_levels",
-                "DEBUG >> NkTraceTest.traces_can_be_created_with_different_log_levels with param 2",
-                "DEBUG << NkTraceTest.traces_can_be_created_with_different_log_levels",
-                " INFO >> NkTraceTest.traces_can_be_created_with_different_log_levels with param 3",
-                " INFO << NkTraceTest.traces_can_be_created_with_different_log_levels");
+                "TRACE >> NkTraceTest.traces_can_be_created_with_different_log_levels:103",
+                "TRACE << NkTraceTest.traces_can_be_created_with_different_log_levels:103",
+                "DEBUG >> NkTraceTest.traces_can_be_created_with_different_log_levels:105",
+                "DEBUG << NkTraceTest.traces_can_be_created_with_different_log_levels:105",
+                " INFO >> NkTraceTest.traces_can_be_created_with_different_log_levels:107",
+                " INFO << NkTraceTest.traces_can_be_created_with_different_log_levels:107",
+                "TRACE >> NkTraceTest.traces_can_be_created_with_different_log_levels:109 with param 1",
+                "TRACE << NkTraceTest.traces_can_be_created_with_different_log_levels:109",
+                "DEBUG >> NkTraceTest.traces_can_be_created_with_different_log_levels:111 with param 2",
+                "DEBUG << NkTraceTest.traces_can_be_created_with_different_log_levels:111",
+                " INFO >> NkTraceTest.traces_can_be_created_with_different_log_levels:113 with param 3",
+                " INFO << NkTraceTest.traces_can_be_created_with_different_log_levels:113");
+    }
+
+    @Test
+    public void custom_logger_should_produce_different_format() {
+        final Logger logger = TestUtils.getFreshLogger(false);
+        NkTrace.useDefaultFormatting = false;
+        try {
+            try(final NkTrace trace = NkTrace.info(logger)) {
+                logger.info("Inner message");
+            }
+            TestUtils.assertLoggerOutputEqual(
+                    " INFO Entering custom_logger_should_produce_different_format in NkTraceTest  .(NkTraceTest.java:135)",
+                    " INFO    Inner message .(NkTraceTest.java:136)",
+                    " INFO Exiting custom_logger_should_produce_different_format in NkTraceTest  .(NkTraceTest.java:137)");
+        } finally {
+            NkTrace.useDefaultFormatting = true;
+        }
     }
 
 }
