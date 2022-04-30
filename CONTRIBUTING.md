@@ -1,5 +1,5 @@
 # Contributing
-This file contains notes and guides for contributors of this projects.
+This file contains notes and guides for contributors of this project.
 
 Thank you for considering making this library better!  
 If you\'d like to help, please create a pull request, or open an issue.  
@@ -16,7 +16,8 @@ This section might be a bit outdated.
 If in doubt, follow the information regarding publishing at:  
 <https://central.sonatype.org>
 
-First of all, install GPG if you haven\'t already.
+First of all, install GPG if you haven\'t already.  
+I suggest using [Kleopatra](https://www.openpgp.org/software/kleopatra/) as it has a nice GUI for both generating and publishing the GPG keys.
 
 Then add following entries to ```%user_home%/.m2/settings.xml``` file:
 ```
@@ -52,7 +53,7 @@ Note: ```package``` goal will also run automatic tests.
 
 To, additionally, push the artifact to Nexus, call:
 ```
-mvn -Duser.name=YOUR_USER_NAME clean deploy
+mvn "-Duser.name=YOUR_USER_NAME" clean deploy
 ```
 The ```-Duser.name``` parameter is optional.  
 If not set, it\'ll use your system\'s user name. 

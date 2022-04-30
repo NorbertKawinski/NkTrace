@@ -7,25 +7,29 @@ import org.slf4j.MDC;
  * It exposes 'indent' variable to logger's context via ThreadLocal variables and MDC.
  *
  * To utilize the indenting feature, setup the logger's pattern to something like:
- * - Logback example: %date [%thread] %5level %mdc{indent}%msg \(%file:%line\) %n
- * - WildFly (color-pattern) example: %K{level}%d{HH:mm:ss,SSS} [%t] %5p %X{indent}%s%e{} a.t(%F:%L)%n
+ * - Logback example: %date [%thread] %5level %mdc{NkTrace_Indent}%msg \(%file:%line\) %n
+ * - WildFly (color-pattern) example: %K{level}%d{HH:mm:ss,SSS} [%t] %5p %X{NkTrace_Indent}%s%e{} a.t(%F:%L)%n
  * - Log4j example: ???
  * - ??? example: ???
  *
  * Defaults:
  * - WildFly: %d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n
  */
-public final class NkTraceIndent
-{
-	public static final String MDC_INDENT_KEY = "indent";
+public final class NkTraceIndent {
+	/**
+	 * Mapped Diagnostic Context key where the current indent can be found
+	 */
+	public static final String MDC_INDENT_KEY = "NkTrace_Indent";
 
 	/**
-	 * 3 is a prefix length of "&gt;&gt; " and "&lt;&lt; ".
+	 * 3 spaces is the same as length of "&gt;&gt; " and "&lt;&lt; " which are commonly used by NkTrace.
 	 * This way, inner logs align vertically to the traces which looks pretty
 	 */
-	public static final int SPACES_PER_INDENT = 3;
+	public static final String SINGLE_INDENT = "   ";
 
-	private static final ThreadLocal<Integer> threadIndent = ThreadLocal.withInitial(() -> 0);
+	private static String[] indentsByLevel = pregenerateIndents(16);
+
+	private static final ThreadLocal<Integer> indentLevelByThread = ThreadLocal.withInitial(() -> 0);
 
 	private NkTraceIndent() {
 	}
@@ -40,19 +44,23 @@ public final class NkTraceIndent
 	 * - But even then, killing a thread could leave the indentation unbalanced as finally{} blocks won't be called
 	 */
 	public static void reset() {
-		threadIndent.remove();
+		indentLevelByThread.remove();
 		updateMDC();
 	}
 
-	public static void increment()
-	{
-		threadIndent.set(threadIndent.get() + 1);
+	/**
+	 * Increases the log indentation by one level
+	 */
+	public static void increment() {
+		indentLevelByThread.set(indentLevelByThread.get() + 1);
 		updateMDC();
 	}
-	
-	public static void decrement()
-	{
-		threadIndent.set(threadIndent.get() - 1);
+
+	/**
+	 * Decreases the log indentation by one level
+	 */
+	public static void decrement() {
+		indentLevelByThread.set(indentLevelByThread.get() - 1);
 		updateMDC();
 	}
 
@@ -60,22 +68,37 @@ public final class NkTraceIndent
 		MDC.put(MDC_INDENT_KEY, getCurrentIndent());
 	}
 
-	public static int getIndentCount()
-	{
-		return threadIndent.get();
+	/**
+	 * @return current indentation level
+	 */
+	public static int getIndentLevel() {
+		return indentLevelByThread.get();
 	}
 
-	public static String getIndent(final int indentCount)
-	{
-		final int spaces = indentCount * SPACES_PER_INDENT;
-
-		final StringBuilder indentBuilder = new StringBuilder(spaces);
-		for (int i = 0; i < spaces; ++i)
-			indentBuilder.append(" ");
-		return indentBuilder.toString();
+	/**
+	 * @param indentLevel indentation level for which to retrieve the indentation string
+	 * @return indentation string
+	 */
+	public static String getIndent(final int indentLevel) {
+		if(indentLevel >= indentsByLevel.length) {
+			indentsByLevel = pregenerateIndents(indentLevel * 2);
+		}
+		return indentsByLevel[indentLevel];
 	}
 
+	/**
+	 * @return current indentation string
+	 */
 	public static String getCurrentIndent() {
-		return getIndent(getIndentCount());
+		return getIndent(getIndentLevel());
+	}
+
+	private static String[] pregenerateIndents(int depth) {
+		final String[] indents = new String[depth];
+		indents[0] = "";
+		for(int i = 1; i < depth; ++i) {
+			indents[i] = indents[i-1] + SINGLE_INDENT;
+		}
+		return indents;
 	}
 }
