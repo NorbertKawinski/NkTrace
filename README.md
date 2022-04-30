@@ -78,6 +78,28 @@ Note: This readme used the following (simplified) layout format:
 %5level %mdc{NkTrace_Indent}%msg%n
 ```
 
+### (Optional) Setting up custom formatter (Logback example)
+Depending on your setup of the pattern layout, you might want to display entry/exit logs differently.  
+It\'s certainly possible because NkTrace uses special markers ```NkTraceEntry``` and ```NkTraceExit``` for its messages.  
+Thanks to this, you can apply different log format only for these messages.
+
+Since Logback doesn't allow setting different layouts based on the marker out of the box, we have to do it ourselves.  
+Please copy the ```NkPatternLayout``` class to your project. This class is located in ```test/java/net/kawinski/logging/utils``` package  
+This class holds 3 pattern layouts inside and switches on them based on the marker in the logging event.
+
+All that\'s left is XML appender configuration:
+```
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+        <layout class="net.kawinski.logging.utils.NkPatternLayout">
+            <entryPattern>%5level %mdc{NkTrace_Indent}Entering %method in %class{0} %msg .\(%file:%line\)%n</entryPattern>
+            <regularPattern>%5level %mdc{NkTrace_Indent}%msg .\(%file:%line\)%n</regularPattern>
+            <exitPattern>%5level %mdc{NkTrace_Indent}Exiting %method in %class{0} %msg .\(%file:%line\)%n</exitPattern>
+        </layout>
+    </encoder>
+</appender>
+```
+
 ## Example 1
 Following code presents the basic features of NkTrace
 ```
