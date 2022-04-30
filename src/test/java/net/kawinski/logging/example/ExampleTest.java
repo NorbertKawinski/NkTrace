@@ -1,6 +1,8 @@
 package net.kawinski.logging.example;
 
 import net.kawinski.logging.NkTrace;
+import net.kawinski.logging.utils.TestUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +13,12 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings({"MagicNumber", "SameParameterValue"}) // Tests are pretty much all about magic numbers
 public class ExampleTest {
-    final Logger logger = LoggerFactory.getLogger(ExampleTest.class);
+    private Logger logger;
+
+    @Before
+    public void resetLogger() {
+        logger = TestUtils.getFreshLogger();
+    }
 
     @Test
     public void example() {

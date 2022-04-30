@@ -16,6 +16,9 @@ import org.slf4j.MDC;
  * - WildFly: %d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n
  */
 public final class NkTraceIndent {
+	/**
+	 * Mapped Diagnostic Context key where the current indent can be found
+	 */
 	public static final String MDC_INDENT_KEY = "NkTrace_Indent";
 
 	/**
@@ -45,11 +48,17 @@ public final class NkTraceIndent {
 		updateMDC();
 	}
 
+	/**
+	 * Increases the log indentation by one level
+	 */
 	public static void increment() {
 		indentLevelByThread.set(indentLevelByThread.get() + 1);
 		updateMDC();
 	}
-	
+
+	/**
+	 * Decreases the log indentation by one level
+	 */
 	public static void decrement() {
 		indentLevelByThread.set(indentLevelByThread.get() - 1);
 		updateMDC();
@@ -59,10 +68,17 @@ public final class NkTraceIndent {
 		MDC.put(MDC_INDENT_KEY, getCurrentIndent());
 	}
 
+	/**
+	 * @return current indentation level
+	 */
 	public static int getIndentLevel() {
 		return indentLevelByThread.get();
 	}
 
+	/**
+	 * @param indentLevel indentation level for which to retrieve the indentation string
+	 * @return indentation string
+	 */
 	public static String getIndent(final int indentLevel) {
 		if(indentLevel >= indentsByLevel.length) {
 			indentsByLevel = pregenerateIndents(indentLevel * 2);
@@ -70,6 +86,9 @@ public final class NkTraceIndent {
 		return indentsByLevel[indentLevel];
 	}
 
+	/**
+	 * @return current indentation string
+	 */
 	public static String getCurrentIndent() {
 		return getIndent(getIndentLevel());
 	}

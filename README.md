@@ -66,65 +66,16 @@ To make the indentation work, you\'ll need to configure the message format to in
 This section will show you Logback example.  
 If you are using any other logging framework, check its formatter documentation.
 
-Create ```src/main/resources/logback.xml``` file: 
-```
-<configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date [%thread] %5level %mdc{NkTrace_Indent}%msg \(%file:%line\) %n</pattern>
-        </encoder>
-    </appender>
-    <root level="all">
-        <appender-ref ref="CONSOLE"/>
-    </root>
-</configuration>
-```
+Create ```src/main/resources/logback.xml``` file.  
+Example configuration can be found in the link below:  
+[https://github.com/NorbertKawinski/NkTraceExample/blob/master/src/main/resources/logback.xml](https://github.com/NorbertKawinski/NkTraceExample/blob/master/src/main/resources/logback.xml)
 
-Or, if you\'d rather like to configure NkTrace programmatically:
-```
-final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-final PatternLayoutEncoder ple = new PatternLayoutEncoder();
-ple.setPattern("%date [%thread] %5level %mdc{NkTrace_Indent}%msg \\(%file:%line\\)%n");
-ple.setContext(lc);
-ple.start();
-
-final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
-consoleAppender.setEncoder(ple);
-consoleAppender.setContext(lc);
-consoleAppender.start();
-
-final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-rootLogger.detachAndStopAllAppenders();
-rootLogger.addAppender(consoleAppender);
-rootLogger.setLevel(Level.ALL);
-```
+Or, if you\'d rather like to configure NkTrace programmatically, check out below example:  
+[https://github.com/NorbertKawinski/NkTraceExample/blob/master/src/main/java/net/kawinski/logging/example/NkTraceExampleManual.java](https://github.com/NorbertKawinski/NkTraceExample/blob/master/src/main/java/net/kawinski/logging/example/NkTraceExampleManual.java)
 
 Note: This readme used the following (simplified) layout format:
 ```
 %5level %mdc{NkTrace_Indent}%msg%n
-```
-
-### (Optional) Setting up custom formatter (Logback example)
-Depending on your setup of the pattern layout, you might want to display entry/exit logs differently.  
-It\'s certainly possible because NkTrace uses special markers ```NkTraceEntry``` and ```NkTraceExit``` for its messages.  
-Thanks to this, you can apply different log format only for these messages.
-
-Since Logback doesn't allow setting different layouts based on the marker out of the box, we have to do it ourselves.  
-Please copy the ```NkPatternLayout``` class to your project. This class is located in ```test/java/net/kawinski/logging/utils``` package  
-This class holds 3 pattern layouts inside and switches on them based on the marker in the logging event.
-
-All that\'s left is XML appender configuration: 
-```
-<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-        <layout class="net.kawinski.logging.utils.NkPatternLayout">
-            <entryPattern>%5level %mdc{NkTrace_Indent}Entering %method in %class{0} %msg .\(%file:%line\)%n</entryPattern>
-            <regularPattern>%5level %mdc{NkTrace_Indent}%msg .\(%file:%line\)%n</regularPattern>
-            <exitPattern>%5level %mdc{NkTrace_Indent}Exiting %method in %class{0} %msg .\(%file:%line\)%n</exitPattern>
-        </layout>
-    </encoder>
-</appender>
 ```
 
 ## Example 1
